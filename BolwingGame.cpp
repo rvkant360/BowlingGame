@@ -1,10 +1,9 @@
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <vector>
-#include <limits>
-
 
 constexpr uint8_t PINS {10}; // Number of pins per frame
 constexpr uint8_t FRAMES {10}; // Number of frames
@@ -160,6 +159,22 @@ public:
 	}
 };
 
+class FrameFactory {
+public:
+	static std::unique_ptr<Frame> createFrame(uint8_t frameIndex, uint8_t r1, uint8_t r2 = 0, uint8_t r3 = 0) {
+		if (frameIndex == FRAMES - 1) { // 10th frame
+			return std::make_unique<TenthFrame>(r1, r2, r3);
+		} else if (r1 == BASE_SCORE) { // Strike
+			return std::make_unique<StrikeFrame>();
+		} else if (r1 + r2 == BASE_SCORE) { // Spare
+			return std::make_unique<SpareFrame>(r1);
+		} else {
+			return std::make_unique<NormalFrame>(r1, r2);
+		}
+	}
+};
+
+
 /**
  * @class BowlingGame
  * @brief Simulates the bowling game and calculates scores
@@ -175,16 +190,9 @@ public:
 		size_t i = 0;
 
 		while (m_frames.size() < FRAMES - 1 && i < m_rolls.size()) {
-			if (m_rolls[i] == BASE_SCORE) { // strike
-				m_frames.push_back(std::make_unique<StrikeFrame>());
-				i++;
-			} else if (i + 1 < m_rolls.size() && m_rolls[i] + m_rolls[i + 1] == BASE_SCORE) { //spare
-				m_frames.push_back(std::make_unique<SpareFrame>(m_rolls[i]));
-				i += 2;
-			} else if (i + 1 < m_rolls.size()) {
-				m_frames.push_back(std::make_unique<NormalFrame>(m_rolls[i], m_rolls[i + 1]));
-				i += 2;
-			}
+			uint8_t r1 = m_rolls[i++];
+			uint8_t r2 = (r1 != PINS && i < m_rolls.size()) ? m_rolls[i++] : 0;
+			m_frames.push_back(FrameFactory::createFrame(m_frames.size(), r1, r2));
 		}
 
 		// 10th frame
@@ -192,9 +200,10 @@ public:
 			uint8_t r1 = m_rolls[i++];
 			uint8_t r2 = (i < m_rolls.size()) ? m_rolls[i++] : 0;
 			uint8_t r3 = (i < m_rolls.size() && (r1 == PINS || r1 + r2 == PINS)) ? m_rolls[i++] : 0;
-			m_frames.push_back(std::make_unique<TenthFrame>(r1, r2, r3));
+			m_frames.push_back(FrameFactory::createFrame(FRAMES - 1, r1, r2, r3));
 		}
 	}
+
 
 	void displayBoard() {
 		std::cout << "\nFrame |";
