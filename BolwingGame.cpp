@@ -236,7 +236,7 @@ public:
 		for (size_t i = 0; i < m_frames.size(); i++) {
 			int frameScore = m_frames[i]->score();
 
-			if (i < 9) { // First 9 frames need bonus calculations
+			if (i < FRAMES - 1) { // First 9 frames need bonus calculations
 				if (m_frames[i]->isStrike()) {
 					frameScore += strikeBonus(rollIndex);
 				} else if (m_frames[i]->isSpare()) {
@@ -277,7 +277,6 @@ private:
 
 };
 
-#define USER_DRIVEN
 /**
  * @brief Helper function to validate user input
  */
