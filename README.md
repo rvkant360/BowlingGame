@@ -14,5 +14,10 @@ Implement a program calculating the score of a single player in Bowling.
   * if a player hits a strike/ spare, 10 pins will be avaialble again for the next throw within the 10th frame
 
 # Solution
+Code can run in two ways
+* Default where fixed input has been give
+  - g++ BowlingGame.cpp -o BowlingGame
+* User input driven
+  - g++ BowlingGame.cpp -o BowlingGame -DUSER_DRIVEN
 # Design
 BowlingGame.jpg
